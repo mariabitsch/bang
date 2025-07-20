@@ -1,0 +1,27 @@
+{
+  "name": "@maria/shell-utils",
+  "version": "1.0.0",
+  "description": "A tiny utility that adds shebang lines to your compiled scripts and makes them executable",
+  "bin": {
+    "bang": "./bin/bang.js"
+  },
+  "files": [
+    "bin/"
+  ],
+  "engines": {
+    "node": ">=12"
+  },
+  "os": [
+    "darwin",
+    "linux"
+  ],
+  "keywords": [
+    "shell",
+    "utilities",
+    "cli",
+    "shebang",
+    "package.json"
+  ],
+  "author": "Maria Bitsch <mariacodes@salonen.dk>",
+  "license": "MIT"
+}
