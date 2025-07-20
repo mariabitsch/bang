@@ -24,4 +24,13 @@
   ],
   "author": "Maria Bitsch <mariacodes@salonen.dk>",
   "license": "MIT"
+  ,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mariabitsch/bang.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mariabitsch/bang/issues"
+  },
+  "homepage": "https://github.com/mariabitsch/bang#readme"
 }
