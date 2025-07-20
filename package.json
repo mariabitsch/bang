@@ -1,6 +1,6 @@
 {
-  "name": "@maria/shell-utils",
-  "version": "1.0.0",
+  "name": "@mariabitsch/bang",
+  "version": "1.0.1",
   "description": "A tiny utility that adds shebang lines to your compiled scripts and makes them executable",
   "bin": {
     "bang": "./bin/bang.js"
