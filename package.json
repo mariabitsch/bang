@@ -3,14 +3,14 @@
   "version": "1.2.0-beta.0",
   "description": "A tiny utility that adds shebang lines to your compiled scripts and makes them executable",
   "bin": {
-    "bang": "./bin/bang.js"
+    "bang": "bin/bang.js"
   },
   "files": [
     "bin/"
   ],
   "scripts": {
     "test": "node test/test.js",
-    "test:watch": "node --watch test/test.js"
+    "test:watch": "node --watch-path=test --watch-path=bin test/test.js"
   },
   "engines": {
     "node": ">=12"
@@ -30,7 +30,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mariabitsch/bang.git"
+    "url": "git+https://github.com/mariabitsch/bang.git"
   },
   "bugs": {
     "url": "https://github.com/mariabitsch/bang/issues"
