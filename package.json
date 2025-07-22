@@ -23,8 +23,7 @@
     "package.json"
   ],
   "author": "Maria Bitsch <mariacodes@salonen.dk>",
-  "license": "MIT"
-  ,
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/mariabitsch/bang.git"

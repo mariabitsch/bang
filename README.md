@@ -70,12 +70,23 @@ The `bang` field in `package.json` maps file paths to executables:
 {
   "bang": {
     "dist/cli.js": "node",
+    "dist/advanced.js": "node --experimental-modules",
+    "scripts/tool.py": "uv run --script",
     "scripts/setup.py": "python3",
     "scripts/deploy.sh": "bash",
     "bin/my-tool.rb": "ruby"
   }
 }
 ```
+
+### Complex executables
+
+Commands with arguments (like `uv run --script` or `node --experimental-modules`) are automatically handled using `env -S`:
+
+- `"node"` → `#!/usr/bin/env node`
+- `"uv run --script"` → `#!/usr/bin/env -S uv run --script`
+
+**Compatibility note**: The `-S` flag works on most modern systems but may not be available on some minimal Linux distributions. If you need maximum compatibility, consider using a wrapper script instead.
 
 ## Features
 
@@ -85,6 +96,7 @@ The `bang` field in `package.json` maps file paths to executables:
 - ✅ **TypeScript friendly**: Perfect for compiled TS projects
 - ✅ **Build integration**: Fits naturally into npm scripts
 - ✅ **Flexible**: Use with any executable (node, python3, bash, etc.)
+- ✅ **Complex commands**: Supports executables with arguments using `env -S`
 
 ## Real-world example
 
