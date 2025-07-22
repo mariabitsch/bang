@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "test": "node test/test.js",
-    "test:watch": "node --watch test/test.js"
+    "test:watch": "node --watch-path=test --watch-path=bin test/test.js"
   },
   "engines": {
     "node": ">=12"
