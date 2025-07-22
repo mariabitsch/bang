@@ -1,0 +1,57 @@
+name: Prerelease Publish
+
+on:
+  push:
+    branches:
+      - prerelease
+
+jobs:
+  publish-rc:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Volta (pins Node & npm version from package.json)
+        uses: volta-cli/action@v4
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Parse version bump type from commit message
+        id: parse_version
+        run: |
+          # Get the latest commit message (works with squash merges)
+          COMMIT_MSG="$(git log -1 --pretty=%B)"
+          # Parse for version bump type
+          if [[ "$COMMIT_MSG" =~ \[(major|minor|patch|premajor|preminor|prepatch|prerelease)\] ]]; then
+            TYPE="${BASH_REMATCH[1]}"
+          else
+            TYPE="prerelease"
+          fi
+          echo "version_type=$TYPE" >> $GITHUB_OUTPUT
+
+      - name: Bump version (${{ steps.parse_version.outputs.version_type }})
+        run: |
+          npm version ${{ steps.parse_version.outputs.version_type }} --no-git-tag-version
+          # Tag version in git (so we can push later)
+          VERSION=$(node -p "require('./package.json').version")
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json || true
+          git commit -m "chore: bump version to $VERSION [skip ci]"
+          git tag "v$VERSION"
+
+      - name: Publish to npm with rc tag
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm publish --tag rc
+
+      - name: Push version bump and tag to staging
+        run: |
+          git push origin HEAD:staging --follow-tags
