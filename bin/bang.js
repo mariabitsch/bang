@@ -52,35 +52,66 @@ function printVersion() {
   console.log(pkg.version);
 }
 
+function parseArgs(args) {
+  const options = {
+    help: false,
+    usage: false,
+  };
+
+  const positional = [];
+
+  for (const arg of args) {
+    if (arg === '--help' || arg == '-h') {
+      options.help = true;
+    } else if (arg === '--version' || arg === '-v') {
+      options.version = true;
+    } else if (arg.match(/^--?[\w\d]+$/)) {
+      throw new Error(`Unknown option '${arg}'`);
+    } else {
+      positional.push(arg);
+    }
+  }
+
+  if (positional.length !== 0 && positional.length !== 2) {
+    throw new Error('Invalid number of arguments');
+  }
+
+  return { options, positional };
+}
+
 function main() {
   const args = process.argv.slice(2);
+  let parsedArgs;
+
+  try {
+    parsedArgs = parseArgs(args);
+  } catch (e) {
+    console.error(`Error: ` + e.message);
+    printUsage(console.error);
+    process.exit(1);
+  }
+
+  const {options, positional} = parsedArgs;
+
+  if (options.help) {
+    printUsage(console.log);
+    process.exit(0);
+  }
+
+  if (options.version) {
+    printVersion();
+    process.exit(0);
+  }
 
   // If called with arguments: bang <file> <executable>
-  if (args.length === 2) {
-    const [filePath, executable] = args;
+  if (positional.length === 2) {
+    const [filePath, executable] = positional;
     addShebang(filePath, executable);
     return;
   }
 
-  // If called with a single argument, check options
-  if (args.length === 1) {
-    switch (args[0]) {
-      case '-h':
-      case '--help':
-        printUsage(console.log);
-        process.exit(0);
-      case '-v':
-      case '--version':
-        printVersion();
-        process.exit(0);
-      default:
-        printUsage(console.error);
-        process.exit(1);
-    }
-  }
-
   // If called without arguments, read from package.json
-  if (args.length === 0) {
+  if (positional.length === 0) {
     let packageJson;
     try {
       packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
