@@ -43,13 +43,16 @@ jobs:
           git commit -m "chore: bump version to $VERSION [skip ci]"
           git tag "v$VERSION"
 
-      - name: Authenticate to npm
-        run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Setup Node.js with npm registry
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: 'package.json'  # Since you're using Volta
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Publish to npm with rc tag
         run: npm publish --tag rc
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Push version bump and tag to staging
         run: git push origin HEAD:staging --follow-tags
