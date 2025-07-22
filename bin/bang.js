@@ -4,11 +4,14 @@ const fs = require('fs');
 const path = require('path');
 
 function createShebang(executable) {
+  // Remove leading -S if user already provided it
+  const cleanExecutable = executable.replace(/^-S\s+/, '');
+  
   // If executable contains arguments, use env -S
-  if (executable.includes(' ')) {
-    return `#!/usr/bin/env -S ${executable}`;
+  if (cleanExecutable.includes(' ')) {
+    return `#!/usr/bin/env -S ${cleanExecutable}`;
   }
-  return `#!/usr/bin/env ${executable}`;
+  return `#!/usr/bin/env ${cleanExecutable}`;
 }
 
 function addShebang(filePath, executable) {
