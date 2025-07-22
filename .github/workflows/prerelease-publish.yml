@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install Volta (pins Node & npm version from package.json)
+      - name: Install Volta (pins Node & npm from package.json)
         uses: volta-cli/action@v4
 
       - name: Install dependencies
@@ -25,9 +25,7 @@ jobs:
       - name: Parse version bump type from commit message
         id: parse_version
         run: |
-          # Get the latest commit message (works with squash merges)
           COMMIT_MSG="$(git log -1 --pretty=%B)"
-          # Parse for version bump type
           if [[ "$COMMIT_MSG" =~ \[(major|minor|patch|premajor|preminor|prepatch|prerelease)\] ]]; then
             TYPE="${BASH_REMATCH[1]}"
           else
@@ -38,7 +36,6 @@ jobs:
       - name: Bump version (${{ steps.parse_version.outputs.version_type }})
         run: |
           npm version ${{ steps.parse_version.outputs.version_type }} --no-git-tag-version
-          # Tag version in git (so we can push later)
           VERSION=$(node -p "require('./package.json').version")
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -46,12 +43,13 @@ jobs:
           git commit -m "chore: bump version to $VERSION [skip ci]"
           git tag "v$VERSION"
 
-      - name: Publish to npm with rc tag
+      - name: Authenticate to npm
+        run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          npm publish --tag rc
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to npm with rc tag
+        run: npm publish --tag rc
 
       - name: Push version bump and tag to staging
-        run: |
-          git push origin HEAD:staging --follow-tags
+        run: git push origin HEAD:staging --follow-tags
