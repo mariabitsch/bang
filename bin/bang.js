@@ -3,6 +3,17 @@
 const fs = require('fs');
 const path = require('path');
 
+function createShebang(executable) {
+  // Remove leading -S if user already provided it
+  const cleanExecutable = executable.replace(/^-S\s+/, '');
+  
+  // If executable contains arguments, use env -S
+  if (cleanExecutable.includes(' ')) {
+    return `#!/usr/bin/env -S ${cleanExecutable}`;
+  }
+  return `#!/usr/bin/env ${cleanExecutable}`;
+}
+
 function addShebang(filePath, executable) {
   if (!fs.existsSync(filePath)) {
     console.error(`Error: File '${filePath}' does not exist`);
@@ -10,7 +21,7 @@ function addShebang(filePath, executable) {
   }
 
   const content = fs.readFileSync(filePath, 'utf8');
-  const shebang = `#!/usr/bin/env ${executable}\n`;
+  const shebang = createShebang(executable) + '\n';
   
   // Check if shebang already exists
   if (content.startsWith('#!')) {
@@ -22,7 +33,7 @@ function addShebang(filePath, executable) {
   fs.writeFileSync(filePath, newContent);
   fs.chmodSync(filePath, 0o755);
   
-  console.log(`Added shebang '#!/usr/bin/env ${executable}' to '${filePath}' and made it executable`);
+  console.log(`Added shebang '${shebang.trim()}' to '${filePath}' and made it executable`);
 }
 
 function main() {
