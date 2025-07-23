@@ -14,19 +14,23 @@ function createShebang(executable) {
   return `#!/usr/bin/env ${cleanExecutable}`;
 }
 
-function addShebang(filePath, executable) {
+function addShebang(filePath, executable, { force }) {
   if (!fs.existsSync(filePath)) {
     console.error(`Error: File '${filePath}' does not exist`);
     process.exit(1);
   }
 
-  const content = fs.readFileSync(filePath, 'utf8');
+  let content = fs.readFileSync(filePath, 'utf8');
   const shebang = createShebang(executable) + '\n';
 
   // Check if shebang already exists
   if (content.startsWith('#!')) {
-    console.log(`File '${filePath}' already has a shebang, skipping`);
-    return;
+    if (!force) {
+      console.log(`File '${filePath}' already has a shebang, skipping`);
+      return;
+    } else {
+      content = content.split(/\n/g).slice(1).join('');
+    }
   }
 
   const newContent = shebang + content;
@@ -40,12 +44,15 @@ function addShebang(filePath, executable) {
 
 function printUsage(print) {
   print('Usage:');
+  print('  [OPTIONS] bang <filename> <executable> ');
+  print('                           # Add shebang to specific file');
   print(
-    '  bang                          # Process all files from package.json "bang" config',
+    '  [OPTIONS] bang           # Process all files from package.json "bang" config',
   );
-  print('  bang <filename> <executable>  # Add shebang to specific file');
-  print('  bang --help, -h               # Print this usage information');
-  print('  bang --version, -v            # Print the version number');
+  print('Options:');
+  print('  --help, -h               # Print this usage information');
+  print('  --version, -v            # Print the version number');
+  print('  --force, -f              # Overwrite existing shebang');
 }
 
 function printVersion() {
@@ -56,6 +63,7 @@ function parseArgs(args) {
   const options = {
     help: false,
     usage: false,
+    force: false,
   };
 
   const positional = [];
@@ -65,6 +73,8 @@ function parseArgs(args) {
       options.help = true;
     } else if (arg === '--version' || arg === '-v') {
       options.version = true;
+    } else if (arg === '--force' || arg === '-f') {
+      options.force = true;
     } else if (arg.match(/^--?[\w\d]+$/)) {
       throw new Error(`Unknown option '${arg}'`);
     } else {
@@ -91,7 +101,7 @@ function main() {
     process.exit(1);
   }
 
-  const {options, positional} = parsedArgs;
+  const { options, positional } = parsedArgs;
 
   if (options.help) {
     printUsage(console.log);
@@ -106,7 +116,7 @@ function main() {
   // If called with arguments: bang <file> <executable>
   if (positional.length === 2) {
     const [filePath, executable] = positional;
-    addShebang(filePath, executable);
+    addShebang(filePath, executable, options);
     return;
   }
 
@@ -128,7 +138,7 @@ function main() {
     }
 
     for (const [filePath, executable] of Object.entries(bangConfig)) {
-      addShebang(filePath, executable);
+      addShebang(filePath, executable, options);
     }
     return;
   }
