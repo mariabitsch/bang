@@ -123,6 +123,93 @@ describe('bang CLI tool', () => {
     assert.strictEqual(content, '#!/usr/bin/env node\necho "hello"\necho "again"');
   });
 
+  test('shows what would be done in dry-run mode without changing files', () => {
+    const tempDir = createTempDir();
+    const testFile = path.join(tempDir, 'test.js');
+    const originalContent = 'console.log("hello");';
+    
+    fs.writeFileSync(testFile, originalContent);
+    
+    const output = runBang(`--dry-run "${testFile}" node`, tempDir);
+    
+    assert.match(output, /Would add shebang.*node.*to.*test\.js/);
+    
+    // File should remain unchanged
+    const content = fs.readFileSync(testFile, 'utf8');
+    assert.strictEqual(content, originalContent);
+    
+    // File should not be made executable
+    const stats = fs.statSync(testFile);
+    if (process.platform !== 'win32') {
+      assert.ok(!(stats.mode & parseInt('111', 8)), 'File should not be executable after dry run');
+    }
+  });
+
+  test('dry-run shows would skip existing shebangs', () => {
+    const tempDir = createTempDir();
+    const testFile = path.join(tempDir, 'existing.sh');
+    const originalContent = '#!/bin/bash\necho "hello"';
+    
+    fs.writeFileSync(testFile, originalContent);
+    
+    const output = runBang(`--dry-run "${testFile}" node`, tempDir);
+    
+    assert.match(output, /Would skip.*already has a shebang/);
+    
+    // File should remain unchanged
+    const content = fs.readFileSync(testFile, 'utf8');
+    assert.strictEqual(content, originalContent);
+  });
+
+  test('dry-run with force shows would replace existing shebangs', () => {
+    const tempDir = createTempDir();
+    const testFile = path.join(tempDir, 'existing.sh');
+    const originalContent = '#!/bin/bash\necho "hello"';
+    
+    fs.writeFileSync(testFile, originalContent);
+    
+    const output = runBang(`--dry-run --force "${testFile}" node`, tempDir);
+    
+    assert.match(output, /Would replace shebang.*node/);
+    
+    // File should remain unchanged
+    const content = fs.readFileSync(testFile, 'utf8');
+    assert.strictEqual(content, originalContent);
+  });
+
+  test('dry-run works with package.json config', () => {
+    const tempDir = createTempDir();
+    
+    // Create test files
+    const file1 = path.join(tempDir, 'script1.js');
+    const file2 = path.join(tempDir, 'script2.py');
+    fs.writeFileSync(file1, 'console.log("script1");');
+    fs.writeFileSync(file2, 'print("script2")');
+    
+    // Create package.json with bang config
+    const packageJson = {
+      name: 'test-project',
+      bang: {
+        'script1.js': 'node',
+        'script2.py': 'python3'
+      }
+    };
+    fs.writeFileSync(path.join(tempDir, 'package.json'), JSON.stringify(packageJson, null, 2));
+    
+    const output = runBang('--dry-run', tempDir);
+    
+    // Check both files would be processed
+    assert.match(output, /Would add shebang.*node.*script1\.js/);
+    assert.match(output, /Would add shebang.*python3.*script2\.py/);
+    
+    // Verify files are unchanged
+    const content1 = fs.readFileSync(file1, 'utf8');
+    const content2 = fs.readFileSync(file2, 'utf8');
+    
+    assert.strictEqual(content1, 'console.log("script1");');
+    assert.strictEqual(content2, 'print("script2")');
+  });
+
   test('errors on non-existent file', () => {
     const tempDir = createTempDir();
 
