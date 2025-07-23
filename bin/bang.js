@@ -29,7 +29,7 @@ function addShebang(filePath, executable, { force }) {
       console.log(`File '${filePath}' already has a shebang, skipping`);
       return;
     } else {
-      content = content.split(/\n/g).slice(1).join('');
+      content = content.split(/\n/g).slice(1).join('\n');
     }
   }
 
@@ -62,7 +62,7 @@ function printVersion() {
 function parseArgs(args) {
   const options = {
     help: false,
-    usage: false,
+    version: false,
     force: false,
   };
 

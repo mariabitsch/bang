@@ -113,14 +113,14 @@ describe('bang CLI tool', () => {
     const tempDir = createTempDir();
     const testFile = path.join(tempDir, 'existing.sh');
 
-    fs.writeFileSync(testFile, '#!/bin/bash\necho "hello"');
+    fs.writeFileSync(testFile, '#!/bin/bash\necho "hello"\necho "again"');
 
     const output = runBang(`--force "${testFile}" node`, tempDir);
 
     assert.match(output, /Added shebang.*node/);
 
     const content = fs.readFileSync(testFile, 'utf8');
-    assert.strictEqual(content, '#!/usr/bin/env node\necho "hello"');
+    assert.strictEqual(content, '#!/usr/bin/env node\necho "hello"\necho "again"');
   });
 
   test('errors on non-existent file', () => {
