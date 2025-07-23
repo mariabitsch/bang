@@ -64,6 +64,13 @@ bang scripts/my-bash-script.sh bash
 # Force overwrite existing shebangs
 bang --force dist/my-script.js node
 bang -f scripts/existing-script.py python3
+
+# Preview changes without making them (dry run)
+bang --dry-run dist/my-script.js node
+bang -n scripts/tool.py python3
+
+# Combine options
+bang --dry-run --force dist/existing-script.js node
 ```
 
 ## Command Line Options
@@ -71,6 +78,7 @@ bang -f scripts/existing-script.py python3
 - `--help, -h` - Show usage information
 - `--version, -v` - Show version number  
 - `--force, -f` - Overwrite existing shebangs instead of skipping files
+- `--dry-run, -n` - Preview changes without modifying files
 
 ## Configuration
 
@@ -108,6 +116,7 @@ Commands with arguments (like `uv run --script` or `node --experimental-modules`
 - ✅ **Flexible**: Use with any executable (node, python3, bash, etc.)
 - ✅ **Complex commands**: Supports executables with arguments using `env -S`
 - ✅ **Force mode**: Overwrite existing shebangs when needed
+- ✅ **Dry run mode**: Preview changes before applying them
 
 ## Real-world example
 

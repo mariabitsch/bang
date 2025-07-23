@@ -14,7 +14,7 @@ function createShebang(executable) {
   return `#!/usr/bin/env ${cleanExecutable}`;
 }
 
-function addShebang(filePath, executable, { force }) {
+function addShebang(filePath, executable, { force, dryRun }) {
   if (!fs.existsSync(filePath)) {
     console.error(`Error: File '${filePath}' does not exist`);
     process.exit(1);
@@ -25,12 +25,29 @@ function addShebang(filePath, executable, { force }) {
 
   // Check if shebang already exists
   if (content.startsWith('#!')) {
-    if (!force) {
-      console.log(`File '${filePath}' already has a shebang, skipping`);
-      return;
+    if (dryRun) {
+      if (!force) {
+        console.log(`Would skip file '${filePath}'. It already has a shebang.`);
+        return;
+      } else {
+        console.log(
+          `Would replace shebang in '${filePath}' with '${shebang.trim()}'`,
+        );
+        return;
+      }
     } else {
-      content = content.split(/\n/g).slice(1).join('\n');
+      if (!force) {
+        console.log(`File '${filePath}' already has a shebang, skipping`);
+        return;
+      } else {
+        content = content.split(/\n/g).slice(1).join('\n');
+      }
     }
+  }
+
+  if (dryRun) {
+    console.log(`Would add shebang '${shebang.trim()}' to '${filePath}'`);
+    return;
   }
 
   const newContent = shebang + content;
@@ -53,6 +70,7 @@ function printUsage(print) {
   print('  --help, -h               # Print this usage information');
   print('  --version, -v            # Print the version number');
   print('  --force, -f              # Overwrite existing shebang');
+  print('  --dry-run, -n            # Preview changes without modifying files');
 }
 
 function printVersion() {
@@ -64,6 +82,7 @@ function parseArgs(args) {
     help: false,
     version: false,
     force: false,
+    dryRun: false,
   };
 
   const positional = [];
@@ -75,6 +94,8 @@ function parseArgs(args) {
       options.version = true;
     } else if (arg === '--force' || arg === '-f') {
       options.force = true;
+    } else if (arg === '--dry-run' || arg === '-n') {
+      options.dryRun = true;
     } else if (arg.match(/^--?[\w\d]+$/)) {
       throw new Error(`Unknown option '${arg}'`);
     } else {
