@@ -60,7 +60,17 @@ This will:
 bang dist/my-script.js node
 bang scripts/my-python-tool.py python3
 bang scripts/my-bash-script.sh bash
+
+# Force overwrite existing shebangs
+bang --force dist/my-script.js node
+bang -f scripts/existing-script.py python3
 ```
+
+## Command Line Options
+
+- `--help, -h` - Show usage information
+- `--version, -v` - Show version number  
+- `--force, -f` - Overwrite existing shebangs instead of skipping files
 
 ## Configuration
 
@@ -90,13 +100,14 @@ Commands with arguments (like `uv run --script` or `node --experimental-modules`
 
 ## Features
 
-- ✅ **Smart detection**: Won't add duplicate shebangs if they already exist
+- ✅ **Smart detection**: Won't add duplicate shebangs if they already exist (use `--force` to overwrite)
 - ✅ **Cross-platform**: Works on macOS, Linux, and Windows
 - ✅ **Zero config**: Works out of the box with sensible defaults
 - ✅ **TypeScript friendly**: Perfect for compiled TS projects
 - ✅ **Build integration**: Fits naturally into npm scripts
 - ✅ **Flexible**: Use with any executable (node, python3, bash, etc.)
 - ✅ **Complex commands**: Supports executables with arguments using `env -S`
+- ✅ **Force mode**: Overwrite existing shebangs when needed
 
 ## Real-world example
 
@@ -129,7 +140,8 @@ Commands with arguments (like `uv run --script` or `node --experimental-modules`
 - 📁 **File not found**: Clear error message if target file doesn't exist
 - 📄 **No package.json**: Helpful error if package.json is missing or malformed  
 - ⚙️ **No config**: Clear instructions if `bang` field is missing
-- 🔄 **Already has shebang**: Skips files that already have shebang lines
+- 🔄 **Already has shebang**: Skips files that already have shebang lines (unless `--force` is used)
+- ❓ **Unknown options**: Clear error for unrecognized command line flags
 
 ## Platform support
 
