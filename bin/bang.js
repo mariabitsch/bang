@@ -14,7 +14,7 @@ function createShebang(executable) {
   return `#!/usr/bin/env ${cleanExecutable}`;
 }
 
-function addShebang(filePath, executable, { force, dryRun }) {
+function addShebang(filePath, executable, { force, dryRun, verbose }) {
   if (!fs.existsSync(filePath)) {
     console.error(`Error: File '${filePath}' does not exist`);
     process.exit(1);
@@ -37,7 +37,9 @@ function addShebang(filePath, executable, { force, dryRun }) {
       }
     } else {
       if (!force) {
-        console.log(`File '${filePath}' already has a shebang, skipping`);
+        if (verbose) {
+          console.log(`File '${filePath}' already has a shebang, skipping`);
+        }
         return;
       } else {
         content = content.split(/\n/g).slice(1).join('\n');
@@ -54,9 +56,11 @@ function addShebang(filePath, executable, { force, dryRun }) {
   fs.writeFileSync(filePath, newContent);
   fs.chmodSync(filePath, 0o755);
 
-  console.log(
-    `Added shebang '${shebang.trim()}' to '${filePath}' and made it executable`,
-  );
+  if (verbose) {
+    console.log(
+      `Added shebang '${shebang.trim()}' to '${filePath}' and made it executable`,
+    );
+  }
 }
 
 function printUsage(print) {
@@ -71,6 +75,7 @@ function printUsage(print) {
   print('  --version, -v            # Print the version number');
   print('  --force, -f              # Overwrite existing shebang');
   print('  --dry-run, -n            # Preview changes without modifying files');
+  print('  --verbose                # Show output for all operations');
 }
 
 function printVersion() {
@@ -83,6 +88,7 @@ function parseArgs(args) {
     version: false,
     force: false,
     dryRun: false,
+    verbose: false,
   };
 
   const positional = [];
@@ -96,6 +102,8 @@ function parseArgs(args) {
       options.force = true;
     } else if (arg === '--dry-run' || arg === '-n') {
       options.dryRun = true;
+    } else if (arg === '--verbose') {
+      options.verbose = true;
     } else if (arg.match(/^--?[\w\d]+$/)) {
       throw new Error(`Unknown option '${arg}'`);
     } else {
